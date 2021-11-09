@@ -1,10 +1,18 @@
 package gui;
 
+import model.LocationStats;
+import services.RequestHttp;
+
 import javax.swing.*;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Cases extends JFrame implements ActionListener {
 
@@ -15,9 +23,10 @@ public class Cases extends JFrame implements ActionListener {
     JMenu helpMenu;
     ImageIcon exitIcon;
 
-    Cases() {
+    Cases() throws IOException, InterruptedException {
        configureFrame();
-      // getCases();
+       RequestHttp requestHttp = new RequestHttp();
+       getCases(requestHttp.getResponse());
     }
 
     private void configureFrame() {
@@ -66,34 +75,47 @@ public class Cases extends JFrame implements ActionListener {
         this.setVisible(true);
     }
 
-    private void getCases() {
-        addTable();
+    private void getCases(LocationStats[] locationStats) {
+        addTable(locationStats);
     }
 
-    public void addTable() {
-        String[] columnNames = {"First Name",
-                "Last Name",
-                "Sport",
-                "# of Years",
-                "Vegetarian"};
+    public void addTable(LocationStats[] locationStats) {
+        JPanel panel = new JPanel();
 
+        String[] columnNames = {"State",
+                "Country",
+                "Latest Total Cases",
+                "Differed From PrevDay"};
         Object[][] data = {
-                {"Kathy", "Smith",
-                        "Snowboarding", 5, Boolean.FALSE},
-                {"John", "Doe",
-                        "Rowing", 3, Boolean.TRUE},
-                {"Sue", "Black",
-                        "Knitting", 2, Boolean.FALSE},
-                {"Jane", "White",
-                        "Speed reading", 20, Boolean.TRUE},
-                {"Joe", "Brown",
-                        "Pool", 10, Boolean.FALSE}
+                for (LocationStats locationStats1: locationStats) {
+                    LocationStats locationStats2 = new LocationStats();
+                    locationStats2.setState(locationStats1.getState());
+                    locationStats2.setCountry(locationStats1.getCountry());
+                    locationStats2.setLatestTotalCases(locationStats1.getLatestTotalCases());
+                    locationStats2.setDiffFromPrevDay(locationStats1.getDiffFromPrevDay());
+                }
         };
+
 
         JTable table = new JTable(data, columnNames);
         table.setBounds(30, 40, 200, 300);
 
+        Dimension dim = new Dimension(20,1);
+        table.setIntercellSpacing(new Dimension(dim));
+        SetRowHeight(table);
+        table.setColumnSelectionAllowed(true);
+
+        JTableHeader header = table.getTableHeader();
+        header.setBackground(Color.yellow);
+        JScrollPane pane = new JScrollPane(table);
+        panel.add(pane);
+        this.add(panel);
         this.add(table);
+    }
+
+    public void SetRowHeight(JTable table){
+        int height = table.getRowHeight();
+        table.setRowHeight(height+10);
     }
 
     @Override
