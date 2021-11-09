@@ -4,12 +4,15 @@ import model.LocationStats;
 import services.RequestHttp;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,7 +63,7 @@ public class Cases extends JFrame implements ActionListener {
         jMenuBar.add(fileMenu);
         jMenuBar.add(editMenu);
         jMenuBar.add(helpMenu);
-
+/*
         // Add label title
         JLabel title = new JLabel();
         title.setText("Today the number of cases on planet are: ");
@@ -68,7 +71,7 @@ public class Cases extends JFrame implements ActionListener {
         title.setHorizontalTextPosition(JLabel.CENTER);
         title.setIconTextGap(10); // Set gap of text to image
         title.setOpaque(true); // Display background color
-        this.add(title);
+        this.add(title); */
 
         //addTable();
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -82,11 +85,13 @@ public class Cases extends JFrame implements ActionListener {
     public void addTable(LocationStats[] locationStats) {
         JPanel panel = new JPanel();
 
-        String[] columnNames = {"State",
-                "Country",
-                "Latest Total Cases",
-                "Differed From PrevDay"};
-        Object[][] data = {
+        List<String> columnNames = new ArrayList<String>();
+        columnNames.add("State");
+        columnNames.add("Country");
+        columnNames.add("Latest Total Cases");
+        columnNames.add("Differed From PrevDay");
+
+      /*  Object[][] data = {
                 for (LocationStats locationStats1: locationStats) {
                     LocationStats locationStats2 = new LocationStats();
                     locationStats2.setState(locationStats1.getState());
@@ -94,23 +99,19 @@ public class Cases extends JFrame implements ActionListener {
                     locationStats2.setLatestTotalCases(locationStats1.getLatestTotalCases());
                     locationStats2.setDiffFromPrevDay(locationStats1.getDiffFromPrevDay());
                 }
-        };
+        }; */
+        List<String[]> values = new ArrayList<String[]>();
+        for (LocationStats currentLocation : locationStats) {
+            values.add(new String[]{currentLocation.getState(), currentLocation.getCountry(), String.valueOf(currentLocation.getLatestTotalCases()), String.valueOf(currentLocation.getDiffFromPrevDay())});
+        }
 
+        TableModel tableModel = new DefaultTableModel(values.toArray(new Object[][] {}), columnNames.toArray());
+        JTable table = new JTable(tableModel);
 
-        JTable table = new JTable(data, columnNames);
-        table.setBounds(30, 40, 200, 300);
+        this.add(new JScrollPane(table), BorderLayout.CENTER);
 
-        Dimension dim = new Dimension(20,1);
-        table.setIntercellSpacing(new Dimension(dim));
-        SetRowHeight(table);
-        table.setColumnSelectionAllowed(true);
+        this.add(table.getTableHeader(), BorderLayout.NORTH);
 
-        JTableHeader header = table.getTableHeader();
-        header.setBackground(Color.yellow);
-        JScrollPane pane = new JScrollPane(table);
-        panel.add(pane);
-        this.add(panel);
-        this.add(table);
     }
 
     public void SetRowHeight(JTable table){
